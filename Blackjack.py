@@ -1,4 +1,9 @@
 import random
+import math
+
+numDecks = 6
+blackjackReturn = 3/2
+
 
 class Card:
     type = ""
@@ -22,6 +27,8 @@ class Card:
             return 11
         elif (cardType == "10" or cardType == "J" or cardType == "Q" or cardType == "K"):
             return 10
+        elif cardType == "Cut":
+            return 0
         else:
             if cardType.isdigit() and int(cardType) > 1 and int(cardType) < 10:
                 return int(cardType)
@@ -76,10 +83,14 @@ class Deck:
         else:
             self.cards = shuffled.copy()
 
-
-    def cutDeck(self, percent): # give the percent as a whole number, not as a decimal
+    def insertCutCard(self, percent): # give percent from beginning of deck
         cards = self.cards
-        numToCut = self.numDecks * 52 * percent / 100
+        location = self.numDecks * 52 * percent / 100 if percent > 1 else math.floor(self.numDecks * 52 * percent)
+        self.cards.insert(location, Card("Cut", "Cut"))
+
+    def cutDeck(self, percent): # give the percent from end
+        cards = self.cards
+        numToCut = self.numDecks * 52 * percent / 100 if percent > 1 else math.floor(self.numDecks * 52 * percent)
         for i in range(int(numToCut)):
             cards.pop()
 
@@ -90,17 +101,17 @@ class Deck:
         self.cards.pop(0)
         return card
 
-deck = Deck(1)
-
 class Hand:
     cards = []
     points = 0
     isBusted = False
+    numAces = 0
 
     def __init__(self):
         self.cards = []
         self.points = self.calcPoints()
         self.isBusted = False
+        self.numAces = 0
 
     def __str__(self):
         if len(cards) == 0:
@@ -134,52 +145,79 @@ class Hand:
         self.points = self.calcPoints()
         self.checkBust()
 
+
 class Dealer:
 
-    hand
+    hand = None
     isShowing = False
     showingPoints = 0
 
     def __init__(self):
         self.hand = Hand()
-        self.hand.cards[-1].isShowing = True
-        self.isShowing = False
-        self.showingPoints = self.calcShowingPoints()
 
     def calcShowingPoints(self):
         points = 0
-        for card in self.hand:
+        for card in self.hand.cards:
             if card.isShowing:
                 points += card.pointValue
         return points
 
     def setup(self):
         self.hand.dealHand()
-        self.hand[0].isShowing = True
+        self.hand.cards[0].isShowing = True
         self.showingPoints = self.calcShowingPoints()
 
     def play(self):
         points = self.hand.calcPoints()
-        if hard:
+        while points < 17:
+            self.hand.hit()
+            points = self.hand.calcPoints()
 
+        return points
 
 class Player:
 
     hands = []
-    bet = 1 # Smallest bet allowed is 1.  Blackjack is 3/2
+    bets = [] # Smallest bet allowed is 1.  Blackjack is 3/2
+
+    def __init__(self):
+        self.hands = [Hand(),]
+        self.bets = [1,]
+
+    def setup(self, betAmount):
+        for i in range(len(self.hands)):
+            hands[i].dealHand()
+            bets[i] = betAmount
+
+    def double(self, index):
+        self.hands[index].hit()
+        self.bets[index] *= 2
+
+        return self.hands[index].calcPoints()
+
+    def split(self, index):
+        self.hands.append(Hand())
+        card = self.hands[index].cards.pop()
+        self.hands[index].hit()
+
+        self.hands[-1].cards.append(card)
+        self.hands[-1].hit()
+
+        self.bets.append(self.bets[index])
+
+    def surrender(self, index):
+
+    def play(self):
+
+
+deck = Deck(numDecks)
+dealer = Dealer()
+player = Player()
+
+class Game:
     runningCount = 0
     trueCount = 0
 
     def __init__(self):
-        self.hands = []
-        self.bet = 1
         self.runningCount = 0
         self.trueCount = 0
-
-player = Hand()
-
-print(player)
-
-player.hit()
-
-print(player)
