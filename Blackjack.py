@@ -105,12 +105,14 @@ class Hand:
     cards = []
     points = 0
     isBusted = False
+    isSurrendered = False
     numAces = 0
 
     def __init__(self):
         self.cards = []
         self.points = self.calcPoints()
         self.isBusted = False
+        self.isSurrendered = False
         self.numAces = 0
 
     def __str__(self):
@@ -127,6 +129,7 @@ class Hand:
         self.cards.clear()
         self.cards.append(deck.dealCard())
         self.cards.append(deck.dealCard())
+        self.calcAces()
 
     def calcPoints(self):
         points = 0
@@ -144,7 +147,18 @@ class Hand:
         self.cards.append(card)
         self.points = self.calcPoints()
         self.checkBust()
+        self.calcAces()
 
+    def clearHand(self):
+        self.cards.clear()
+        self.points = 0
+        self.isBusted = False
+        self.numAces = 0
+
+    def calcAces(self):
+        for card in self.cards:
+            if card.type == "A":
+                self.numAces += 1
 
 class Dealer:
 
@@ -206,9 +220,10 @@ class Player:
         self.bets.append(self.bets[index])
 
     def surrender(self, index):
+        self.hands[index].isSurrendered = True
 
     def play(self):
-
+        if
 
 deck = Deck(numDecks)
 dealer = Dealer()
@@ -217,7 +232,67 @@ player = Player()
 class Game:
     runningCount = 0
     trueCount = 0
+    winnings = 0
+    deck = None
+    dealer = None
+    Player = None
 
-    def __init__(self):
+    def __init__(self, decks):
         self.runningCount = 0
         self.trueCount = 0
+        self.winnings = 0
+        self.deck = Deck(decks)
+        self.dealer = Dealer()
+        self.Player()
+
+    def playRound(self):
+        if self.trueCount < 1:
+            self.player.setup(1)
+        elif self.trueCount >= 1 and self.trueCount < 2:
+            self.player.setup(2)
+        elif self.trueCount >= 2 and self.trueCount < 3:
+            self.player.setup(3)
+        elif self.trueCount >= 3 and self.trueCount < 4:
+            self.player.setup(5)
+        elif self.trueCount >= 4 and self.trueCount < 5:
+            self.player.setup(10)
+        else:
+            self.player.setup(12)
+
+        dealer.setup()
+
+        player.play()
+
+        dealer.play()
+
+        for hand, bet in zip(self.player.hands, self.player.bets):
+            if hand.isSurrendered:
+                self.winnings -= bet/2
+            elif hand.isBusted:
+                self.winnings -= bet
+            elif not self.dealer.hand.isBusted:
+                if hand.points < self.dealer.hand.points:
+                    self.winnings -= bet
+                elif hand.points > self.dealer.hand.points:
+                    self.winnings += bet
+            else:
+                self.winnings += bet
+
+        self.calcCount()
+
+        for i in range(len(self.player.hands)):
+            self.player.hands[i].clearHand()
+            self.player.bet[i] = 0
+
+        self.dealer.hand.clearHand()
+
+    def calcCount(self):
+        for hand in self.player.hands:
+            for card in hand.cards:
+                if card.type == "A" or card.type == "K" or card.type == "Q" or card.type == "J" or card.type == "10":
+                    self.runningCount -= 1
+                elif card.type == "6" or card.type == "5" or card.type == "4" or card.type == "3" or card.type == "2":
+                    self.runningCount += 1
+
+        decks = round(self.deck.numDecks + (len(self.deck.cards) - self.deck.numDecks * 52)/52)
+        self.trueCount = self.runningCount/decks
